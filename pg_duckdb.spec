@@ -1,7 +1,8 @@
 Name: pg_duckdb
 
-%global version 1.0.0
-Version: %{version}
+%global pg_duckdb_version 1.0.0
+%global duckdb_version 1.3.2
+Version: %{pg_duckdb_version}
 Release: 1%{?dist}
 
 Summary: DuckDB-powered Postgres for high performance apps & analytics.
@@ -14,22 +15,25 @@ BuildRequires: gcc-c++
 BuildRequires: git
 BuildRequires: lz4-devel
 BuildRequires: make
-BuildRequires: ninja-build
 BuildRequires: postgresql-server-devel
+
+BuildRequires: duckdb-devel = %{duckdb_version}
 
 %description
 pg_duckdb integrates DuckDB's columnar-vectorized analytics engine into PostgreSQL, enabling high-performance analytics and data-intensive applications.
 
 %prep
 git clone -q https://github.com/duckdb/pg_duckdb.git
-cd pg_duckdb
-git checkout v%{version}
-git submodule update -q --init
+git -C pg_duckdb -c advice.detachedHead=false checkout v%{pg_duckdb_version}
+git -C pg_duckdb rev-parse HEAD
+mkdir -p pg_duckdb/.git/modules/third_party/duckdb
+touch pg_duckdb/.git/modules/third_party/duckdb/HEAD
+mkdir -p pg_duckdb/third_party/duckdb/src
+ln -s /usr/include pg_duckdb/third_party/duckdb/src/include
+mkdir -p pg_duckdb/build/release/src
+ln -s /usr/lib64/libduckdb.so pg_duckdb/build/release/src/libduckdb.so
 
 %build
-cd pg_duckdb
-export PG_CFLAGS=-D_GNU_SOURCE
-export DUCKDB_BUILD=ReleaseStatic
 make %{_smp_mflags}
 
 %install
