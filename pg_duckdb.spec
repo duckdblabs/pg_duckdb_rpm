@@ -20,14 +20,16 @@ BuildRequires: postgresql-server-devel
 pg_duckdb integrates DuckDB's columnar-vectorized analytics engine into PostgreSQL, enabling high-performance analytics and data-intensive applications.
 
 %prep
-git -q clone https://github.com/duckdb/pg_duckdb.git
+git clone -q https://github.com/duckdb/pg_duckdb.git
 cd pg_duckdb
 git checkout v%{version}
-git -q submodule update --init
+git submodule update -q --init
 
 %build
 cd pg_duckdb
-make %_smp_mflags
+export PG_CFLAGS=-D_GNU_SOURCE
+export DUCKDB_BUILD=ReleaseStatic
+make %{_smp_mflags}
 
 %install
 cd pg_duckdb
