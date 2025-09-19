@@ -34,7 +34,6 @@ git -C duckdb -c advice.detachedHead=false checkout v%{duckdb_version}
 git -C duckdb rev-parse HEAD
 
 %build
-#%global _lto_cflags %nil
 export CMAKE_BUILD_PARALLEL_LEVEL=%{_smp_mflags}
 export ENABLE_EXTENSION_AUTOLOADING=1
 export ENABLE_EXTENSION_AUTOINSTALL=1
