@@ -34,7 +34,7 @@ git -C duckdb -c advice.detachedHead=false checkout v%{duckdb_version}
 git -C duckdb rev-parse HEAD
 
 %build
-export CMAKE_BUILD_PARALLEL_LEVEL=%{_smp_mflags}
+export CMAKE_BUILD_PARALLEL_LEVEL=%{_smp_build_ncpus}
 export ENABLE_EXTENSION_AUTOLOADING=1
 export ENABLE_EXTENSION_AUTOINSTALL=1
 export EXTENSION_CONFIGS="$(pwd)/pg_duckdb/third_party/pg_duckdb_extensions.cmake"
