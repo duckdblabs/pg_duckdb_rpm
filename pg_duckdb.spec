@@ -3,11 +3,13 @@ Name: pg_duckdb
 %global pg_duckdb_version 1.0.0
 %global duckdb_version 1.3.2
 Version: %{pg_duckdb_version}
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: DuckDB-powered Postgres for high performance apps & analytics.
 License: MIT
 Url: https://github.com/duckdb/pg_duckdb
+
+Patch1: duckdb_system.patch
 
 BuildRequires: cmake
 BuildRequires: gcc
@@ -24,25 +26,22 @@ pg_duckdb integrates DuckDB's columnar-vectorized analytics engine into PostgreS
 
 %prep
 git clone -q https://github.com/duckdb/pg_duckdb.git
-git -C pg_duckdb -c advice.detachedHead=false checkout v%{pg_duckdb_version}
-git -C pg_duckdb rev-parse HEAD
-mkdir -p pg_duckdb/.git/modules/third_party/duckdb
-touch pg_duckdb/.git/modules/third_party/duckdb/HEAD
-mkdir -p pg_duckdb/third_party/duckdb/src
-ln -s /usr/include pg_duckdb/third_party/duckdb/src/include
-mkdir -p pg_duckdb/build/release/src
-ln -s /usr/lib64/libduckdb.so pg_duckdb/build/release/src/libduckdb.so
+pushd pg_duckdb
+git -c advice.detachedHead=false checkout v%{pg_duckdb_version}
+git rev-parse HEAD
+%patch 1 -p1
+popd
 
 %build
-make %{_smp_mflags}
+export DUCKDB_BUILD=System
+make -C pg_duckdb %{_smp_mflags}
 
 %install
-cd pg_duckdb
 mkdir -p %{buildroot}%{_libdir}/pgsql
 mkdir -p %{buildroot}%{_datadir}/pgsql/extension
-cp -p ./pg_duckdb.so %{buildroot}%{_libdir}/pgsql/
-cp -p ./pg_duckdb.control %{buildroot}%{_datadir}/pgsql/extension/
-cp -p ./sql/pg_duckdb--1.0.0.sql %{buildroot}%{_datadir}/pgsql/extension/
+cp -p ./pg_duckdb/pg_duckdb.so %{buildroot}%{_libdir}/pgsql/
+cp -p ./pg_duckdb/pg_duckdb.control %{buildroot}%{_datadir}/pgsql/extension/
+cp -p ./pg_duckdb/sql/pg_duckdb--1.0.0.sql %{buildroot}%{_datadir}/pgsql/extension/
 
 %files
 %{_libdir}/pgsql/pg_duckdb.so
@@ -53,5 +52,8 @@ cp -p ./sql/pg_duckdb--1.0.0.sql %{buildroot}%{_datadir}/pgsql/extension/
 %license pg_duckdb/LICENSE
 
 %changelog
+* Fri Sep 19 2025 DuckDB Labs <alexkasko@duckdblabs.com> - 1.0.0-2
+- Use system engine library
+
 * Thu Sep 18 2025 DuckDB Labs <alexkasko@duckdblabs.com> - 1.0.0-1
 - Initial package 
