@@ -1,5 +1,6 @@
 Name: duckdb
 
+%global pg_duckdb_version 1.0.0
 %global duckdb_version 1.3.2
 Version: %{duckdb_version}
 Release: 1%{?dist}
@@ -25,25 +26,25 @@ Development files.
 
 %prep
 git clone -q https://github.com/duckdb/pg_duckdb.git
+git -C pg_duckdb -c advice.detachedHead=false checkout v%{pg_duckdb_version}
+git -C pg_duckdb rev-parse HEAD
 git clone -q https://github.com/duckdb/duckdb.git
-cd duckdb
-git -c advice.detachedHead=false checkout v%{duckdb_version}
+git -C duckdb -c advice.detachedHead=false checkout v%{duckdb_version}
+git -C duckdb rev-parse HEAD
 
 %build
 #%global _lto_cflags %nil
-cd duckdb
 export CMAKE_BUILD_PARALLEL_LEVEL=%{_smp_mflags}
 export ENABLE_EXTENSION_AUTOLOADING=1
 export ENABLE_EXTENSION_AUTOINSTALL=1
-export EXTENSION_CONFIGS=../pg_duckdb/third_party/pg_duckdb_extensions.cmake
-make release
+export EXTENSION_CONFIGS="$(pwd)/pg_duckdb/third_party/pg_duckdb_extensions.cmake"
+make -C duckdb release
 
 %install
-cd duckdb
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
-cp ./build/release/src/libduckdb.so %{buildroot}%{_libdir}/
-cp -r ./src/include/* %{buildroot}%{_includedir}/
+cp ./duckdb/build/release/src/libduckdb.so %{buildroot}%{_libdir}/
+cp -r ./duckdb/src/include/* %{buildroot}%{_includedir}/
 
 %files
 %{_libdir}/libduckdb.so
