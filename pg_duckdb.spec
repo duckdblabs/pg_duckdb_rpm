@@ -12,6 +12,7 @@ BuildRequires: cmake
 BuildRequires: gcc
 BuildRequires: gcc-c++
 BuildRequires: git
+BuildRequires: lz4-devel
 BuildRequires: make
 BuildRequires: ninja-build
 BuildRequires: postgresql-server-devel
