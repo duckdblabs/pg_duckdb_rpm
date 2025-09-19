@@ -14,6 +14,7 @@ BuildRequires: gcc
 BuildRequires: gcc-c++
 BuildRequires: git
 BuildRequires: make
+BuildRequires: openssl-devel
 
 %description
 DuckDB is a high-performance analytical database system.
